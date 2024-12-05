@@ -2,10 +2,10 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import {
   Player,
-  ClientToServerEvents,
-  InterServerEvents,
-  ServerToClientEvents,
-  SocketData,
+  // ClientToServerEvents,
+  // InterServerEvents,
+  // ServerToClientEvents,
+  // SocketData,
 } from "./types";
 import {
   createNewPlayer,
@@ -15,13 +15,15 @@ import {
   createNewRoom,
 } from "./roomUtils";
 
+import {
+  playerStartsDrawing,
+  playerStopsDrawing,
+  startGame,
+  wordGuessed,
+} from "./gameUtils";
+
 const httpServer = createServer();
-const io = new Server<
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData
->(httpServer, {
+export const io = new Server(httpServer, {
   cors: {
     origin: "http://localhost:3000",
   },
@@ -31,7 +33,8 @@ io.on("connection", (socket: any) => {
   console.log(`${socket.id} connected`);
 
   socket.on("join random room", (username: string, avatar: string) => {
-    const newPlayer: Player = createNewPlayer(socket, username, avatar);
+    const admin = false;
+    const newPlayer: Player = createNewPlayer(socket, username, avatar, admin);
     const roomToJoin: string | null = findRoomsToJoin();
 
     if (roomToJoin === null) {
@@ -44,7 +47,8 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on("create a new room", (username: string, avatar: string) => {
-    const newPlayer: Player = createNewPlayer(socket, username, avatar);
+    const admin = true;
+    const newPlayer: Player = createNewPlayer(socket, username, avatar, admin);
 
     createNewRoom(newPlayer, socket);
   });
@@ -52,7 +56,13 @@ io.on("connection", (socket: any) => {
   socket.on(
     "join a room",
     (username: string, avatar: string, roomId: string) => {
-      const newPlayer: Player = createNewPlayer(socket, username, avatar);
+      const admin = false;
+      const newPlayer: Player = createNewPlayer(
+        socket,
+        username,
+        avatar,
+        admin
+      );
 
       addPlayerToRoom(newPlayer, roomId, socket);
     }
@@ -60,6 +70,28 @@ io.on("connection", (socket: any) => {
 
   socket.on("disconnect", () => {
     removePlayerFromRoom(socket);
+  });
+
+  //when player starts drawing
+  socket.on(
+    "starts drawing",
+    (clientX: number, clientY: number, color: string, width: number) => {
+      playerStartsDrawing(socket, clientX, clientY, color, width);
+    }
+  );
+
+  //when player stops drawing
+  socket.on("stops drawing", () => {
+    playerStopsDrawing(socket);
+  });
+
+  //admin starts the game
+  socket.on("start game", () => {
+    startGame(socket);
+  });
+
+  socket.on("guess", (guess: string) => {
+    wordGuessed(socket, guess);
   });
 });
 

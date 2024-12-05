@@ -1,12 +1,12 @@
 import { Room, Player } from "./types";
+import {
+  MAX_ROOM_SIZE,
+  RoomList,
+  AvailableIds,
+  socketRoomMap,
+} from "./appData";
 
-const maxRoomSize = process.env.MAX_ROOM_SIZE;
-const RoomList = new Map<string, Room>();
-const AvailableIds = new Map<number, number>();
-const socketRoomMap = new Map<any, string>();
-for (let i = 1; i <= 100; i++) {
-  AvailableIds.set(i, 1);
-}
+//maybe i need to send an updated list of players every time
 
 export function createNewRoom(player: Player, socket: any): void {
   if (AvailableIds.size === 0) {
@@ -20,6 +20,13 @@ export function createNewRoom(player: Player, socket: any): void {
     RoomList.set(roomId, {
       players: [player],
       noOfPlayers: 1,
+      admin: socket.id,
+      gameState: {
+        currentRound: 0,
+        currentPlayer: 0,
+        currentWord: "",
+        correctGuessors: new Set<string>(),
+      },
     });
     AvailableIds.delete(parseInt(key));
     socketRoomMap.set(socket.id, roomId);
@@ -30,7 +37,7 @@ export function createNewRoom(player: Player, socket: any): void {
 
 export function findRoomsToJoin(): string | null {
   for (const [key, value] of RoomList.entries()) {
-    if (value.noOfPlayers < maxRoomSize) {
+    if (value.noOfPlayers < MAX_ROOM_SIZE) {
       return key;
     }
   }
@@ -47,7 +54,7 @@ export function addPlayerToRoom(
     socket.emit("error", { message: "Room does not exist" });
     return;
   }
-  if (room.noOfPlayers === maxRoomSize) {
+  if (room.noOfPlayers === MAX_ROOM_SIZE) {
     socket.emit("error", { message: "Room is full" });
     return;
   }
@@ -62,13 +69,17 @@ export function addPlayerToRoom(
 export function createNewPlayer(
   socket: any,
   username: string,
-  avatar: string
+  avatar: string,
+  admin: boolean
 ): Player {
   const newPlayer: Player = {
     username,
     avatar,
     score: 0,
     socketId: socket.id,
+    drawing: false,
+    admin,
+    guessedAt: null,
   };
   return newPlayer;
 }
@@ -94,11 +105,23 @@ export function removePlayerFromRoom(socket: any): void {
       "player-left",
       `${playersRoom.players[playerIndex].username} has left the room`
     );
+
+  //remove the player
   playersRoom.players.splice(playerIndex, 1);
   playersRoom.noOfPlayers--;
   socketRoomMap.delete(socket.id);
   socket.leave(playersRoomId);
+
+  //if leaving player was the last player
   if (playersRoom.noOfPlayers === 0) {
     RoomList.delete(playersRoomId);
+    return;
+  }
+
+  //if leaving player was admin, make a new admin
+  if (playersRoom.admin === socket.id) {
+    const newAdminSocketId = playersRoom.players[0].socketId;
+    playersRoom.admin = newAdminSocketId;
+    playersRoom.players[0].admin = true;
   }
 }
