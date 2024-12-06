@@ -1,12 +1,6 @@
 import { createServer } from "http";
-import { Server } from "socket.io";
-import {
-  Player,
-  // ClientToServerEvents,
-  // InterServerEvents,
-  // ServerToClientEvents,
-  // SocketData,
-} from "./types";
+import { Server, Socket } from "socket.io";
+import { Player } from "./types";
 import {
   createNewPlayer,
   addPlayerToRoom,
@@ -14,13 +8,13 @@ import {
   findRoomsToJoin,
   createNewRoom,
 } from "./roomUtils";
-
 import {
   playerStartsDrawing,
   playerStopsDrawing,
   startGame,
   wordGuessed,
 } from "./gameUtils";
+import { EVENTS } from "./appData";
 
 const httpServer = createServer();
 export const io = new Server(httpServer, {
@@ -29,10 +23,10 @@ export const io = new Server(httpServer, {
   },
 });
 
-io.on("connection", (socket: any) => {
+io.on("connection", (socket: Socket) => {
   console.log(`${socket.id} connected`);
 
-  socket.on("join random room", (username: string, avatar: string) => {
+  socket.on(EVENTS.CONNECTED, (username: string, avatar: string) => {
     const admin = false;
     const newPlayer: Player = createNewPlayer(socket, username, avatar, admin);
     const roomToJoin: string | null = findRoomsToJoin();
@@ -46,7 +40,7 @@ io.on("connection", (socket: any) => {
     }
   });
 
-  socket.on("create a new room", (username: string, avatar: string) => {
+  socket.on(EVENTS.CREATE_A_NEW_ROOM, (username: string, avatar: string) => {
     const admin = true;
     const newPlayer: Player = createNewPlayer(socket, username, avatar, admin);
 
@@ -54,7 +48,7 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on(
-    "join a room",
+    EVENTS.JOIN_A_ROOM,
     (username: string, avatar: string, roomId: string) => {
       const admin = false;
       const newPlayer: Player = createNewPlayer(
@@ -68,29 +62,29 @@ io.on("connection", (socket: any) => {
     }
   );
 
-  socket.on("disconnect", () => {
+  socket.on(EVENTS.DISCONNECT, () => {
     removePlayerFromRoom(socket);
   });
 
   //when player starts drawing
   socket.on(
-    "starts drawing",
+    EVENTS.STARTS_DRAWING,
     (clientX: number, clientY: number, color: string, width: number) => {
       playerStartsDrawing(socket, clientX, clientY, color, width);
     }
   );
 
   //when player stops drawing
-  socket.on("stops drawing", () => {
+  socket.on(EVENTS.STOPS_DRAWING, () => {
     playerStopsDrawing(socket);
   });
 
   //admin starts the game
-  socket.on("start game", () => {
+  socket.on(EVENTS.START_GAME, () => {
     startGame(socket);
   });
 
-  socket.on("guess", (guess: string) => {
+  socket.on(EVENTS.GUESS, (guess: string) => {
     wordGuessed(socket, guess);
   });
 });

@@ -9,9 +9,11 @@ import {
 import { io } from "./index";
 import { Room, Player } from "./types";
 import { generateWordWithBlanks } from "./utils";
+import { Socket } from "socket.io";
+import { EVENTS } from "./appData";
 
 export function playerStartsDrawing(
-  socket: any,
+  socket: Socket,
   clientX: number,
   clientY: number,
   color: string,
@@ -23,18 +25,18 @@ export function playerStartsDrawing(
   }
   socket
     .to(socketRoomId)
-    .emit("player coordinates", { clientX, clientY, color, width });
+    .emit(EVENTS.PLAYER_COORDINATES, { clientX, clientY, color, width });
 }
 
-export function playerStopsDrawing(socket: any): void {
+export function playerStopsDrawing(socket: Socket): void {
   const socketRoomId: string | undefined = socketRoomMap.get(socket.id);
   if (!socketRoomId) {
     return;
   }
-  socket.to(socketRoomId).emit("stopped drawing");
+  socket.to(socketRoomId).emit(EVENTS.STOPPED_DRAWING);
 }
 
-export function startGame(socket: any): void {
+export function startGame(socket: Socket): void {
   const roomId: string | undefined = socketRoomMap.get(socket.id);
   if (!roomId) {
     return;
@@ -45,7 +47,7 @@ export function startGame(socket: any): void {
   }
   room.gameState.currentRound = 1;
   room.gameState.currentPlayer = 0;
-  io.to(roomId).emit("game started", room);
+  io.to(roomId).emit(EVENTS.GAME_STARTED, room);
   assignWord(roomId);
 }
 
@@ -60,10 +62,10 @@ export function assignWord(roomId: string): void {
   }
   const currentPlayerIndex: number = currentRoom.gameState.currentPlayer;
   const currentPlayer: Player = currentRoom.players[currentPlayerIndex];
-  io.to(currentPlayer.socketId).emit("word-choosen", word);
+  io.to(currentPlayer.socketId).emit(EVENTS.WORD_GIVEN, word);
   io.to(roomId)
     .except(currentPlayer.socketId)
-    .emit("word-choosen", wordWithBlanks);
+    .emit(EVENTS.WORD_GIVEN, wordWithBlanks);
 
   const timeOut = setTimeout(() => {
     endRound(roomId);
@@ -72,6 +74,7 @@ export function assignWord(roomId: string): void {
 }
 
 export function endRound(roomId: string): void {
+  clearTimers(roomId);
   const currentRoom: Room | undefined = RoomList.get(roomId);
   if (!currentRoom) {
     return;
@@ -84,6 +87,8 @@ export function endRound(roomId: string): void {
   }
 
   givePoints(roomId);
+  currentRoom.gameState.currentWord = "";
+  io.to(roomId).emit(EVENTS.TURN_ENDED, currentRoom);
 
   const timeOut = setTimeout(() => {
     if (currentRoom.gameState.currentRound === MAX_ROUNDS) {
@@ -127,10 +132,10 @@ export function endGame(roomId: string): void {
   currentRoom.gameState.currentWord = "";
   currentRoom.gameState.correctGuessors.clear();
 
-  io.to(roomId).emit("game-ended", currentRoom);
+  io.to(roomId).emit(EVENTS.GAME_ENDED, currentRoom);
 }
 
-export function wordGuessed(socket: any, guess: string): void {
+export function wordGuessed(socket: Socket, guess: string): void {
   const roomId: string | undefined = socketRoomMap.get(socket);
   if (!roomId) {
     return;
@@ -149,7 +154,7 @@ export function wordGuessed(socket: any, guess: string): void {
   if (guess.toLowerCase() === word) {
     currentRoom.gameState.correctGuessors.add(socket.id);
     guesserPlayer.guessedAt = new Date();
-    io.to(roomId).emit("guessed", guesserPlayer); // might need to change this to hide this response with green color on frontend
+    io.to(roomId).emit(EVENTS.CORRECT_GUESS, guesserPlayer); // might need to change this to hide this response with green color on frontend
     //if all players have guessed
     if (
       currentRoom.gameState.correctGuessors.size ===
@@ -158,7 +163,7 @@ export function wordGuessed(socket: any, guess: string): void {
       endRound(roomId);
     }
   } else {
-    io.to(roomId).emit("guess", guess, guesserPlayer);
+    io.to(roomId).emit(EVENTS.WRONG_GUESS, guess, guesserPlayer);
   }
 }
 

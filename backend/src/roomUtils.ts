@@ -5,10 +5,12 @@ import {
   AvailableIds,
   socketRoomMap,
 } from "./appData";
+import { Socket } from "socket.io";
+import { EVENTS } from "./appData";
 
 //maybe i need to send an updated list of players every time
 
-export function createNewRoom(player: Player, socket: any): void {
+export function createNewRoom(player: Player, socket: Socket): void {
   if (AvailableIds.size === 0) {
     socket.emit("error", {
       message: "Cannot create room now. Please try again later",
@@ -47,7 +49,7 @@ export function findRoomsToJoin(): string | null {
 export function addPlayerToRoom(
   player: Player,
   roomId: string,
-  socket: any
+  socket: Socket
 ): void {
   const room = RoomList.get(roomId);
   if (!room) {
@@ -60,14 +62,14 @@ export function addPlayerToRoom(
   }
   room.players.push(player);
   room.noOfPlayers++;
-  socket.to(roomId).emit("player-joined", `${player.username} joined`);
+  socket.to(roomId).emit(EVENTS.PLAYER_JOINED, `${player.username} joined`);
   socketRoomMap.set(socket.id, roomId);
   socket.join(roomId);
   return;
 }
 
 export function createNewPlayer(
-  socket: any,
+  socket: Socket,
   username: string,
   avatar: string,
   admin: boolean
@@ -84,7 +86,7 @@ export function createNewPlayer(
   return newPlayer;
 }
 
-export function removePlayerFromRoom(socket: any): void {
+export function removePlayerFromRoom(socket: Socket): void {
   const playersRoomId: string | undefined = socketRoomMap.get(socket.id);
   if (!playersRoomId) {
     return;
@@ -102,7 +104,7 @@ export function removePlayerFromRoom(socket: any): void {
   socket
     .to(playersRoomId)
     .emit(
-      "player-left",
+      EVENTS.PLAYER_LEFT,
       `${playersRoom.players[playerIndex].username} has left the room`
     );
 
