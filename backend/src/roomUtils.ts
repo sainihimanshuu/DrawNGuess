@@ -62,7 +62,7 @@ export function addPlayerToRoom(
   }
   room.players.push(player);
   room.noOfPlayers++;
-  socket.to(roomId).emit(EVENTS.PLAYER_JOINED, `${player.username} joined`);
+  socket.to(roomId).emit(EVENTS.PLAYER_JOINED, player);
   socketRoomMap.set(socket.id, roomId);
   socket.join(roomId);
   return;
@@ -103,10 +103,7 @@ export function removePlayerFromRoom(socket: Socket): void {
   }
   socket
     .to(playersRoomId)
-    .emit(
-      EVENTS.PLAYER_LEFT,
-      `${playersRoom.players[playerIndex].username} has left the room`
-    );
+    .emit(EVENTS.PLAYER_LEFT, playersRoom.players[playerIndex]);
 
   //remove the player
   playersRoom.players.splice(playerIndex, 1);

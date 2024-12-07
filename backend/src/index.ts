@@ -67,12 +67,9 @@ io.on("connection", (socket: Socket) => {
   });
 
   //when player starts drawing
-  socket.on(
-    EVENTS.STARTS_DRAWING,
-    (clientX: number, clientY: number, color: string, width: number) => {
-      playerStartsDrawing(socket, clientX, clientY, color, width);
-    }
-  );
+  socket.on(EVENTS.STARTS_DRAWING, (clientX: number, clientY: number) => {
+    playerStartsDrawing(socket, clientX, clientY);
+  });
 
   //when player stops drawing
   socket.on(EVENTS.STOPS_DRAWING, () => {

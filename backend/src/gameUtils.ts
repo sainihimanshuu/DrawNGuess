@@ -15,17 +15,15 @@ import { EVENTS } from "./appData";
 export function playerStartsDrawing(
   socket: Socket,
   clientX: number,
-  clientY: number,
-  color: string,
-  width: number
+  clientY: number
+  // color: string,
+  // width: number
 ): void {
   const socketRoomId: string | undefined = socketRoomMap.get(socket.id);
   if (!socketRoomId) {
     return;
   }
-  socket
-    .to(socketRoomId)
-    .emit(EVENTS.PLAYER_COORDINATES, { clientX, clientY, color, width });
+  socket.to(socketRoomId).emit(EVENTS.PLAYER_COORDINATES, clientX, clientY);
 }
 
 export function playerStopsDrawing(socket: Socket): void {
