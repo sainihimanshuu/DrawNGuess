@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Player, Room } from "../../types";
 import { socket } from "../../socket";
 import { EVENTS } from "../../types";
@@ -8,13 +8,15 @@ import { EVENTS } from "../../types";
 export const PlayerList = (): JSX.Element => {
   const [list, setList] = useState<Player[]>([]);
 
-  const addPlayer = (player: Player) => {
+  const addPlayer = useCallback((player: Player) => {
     setList([...list, player]);
-  };
-  const removePlayer = (player: Player) => {
+  }, []);
+
+  const removePlayer = useCallback((player: Player) => {
     setList((prevList) => prevList.filter((p) => p !== player));
-  };
-  const updateScores = (room: Room) => {
+  }, []);
+
+  const updateScores = useCallback((room: Room) => {
     setList((prevList) =>
       prevList.map((p) => {
         const playerInRoom = room.players.find(
@@ -23,7 +25,7 @@ export const PlayerList = (): JSX.Element => {
         return playerInRoom ? { ...p, score: playerInRoom.score } : p;
       })
     );
-  };
+  }, []);
 
   useEffect(() => {
     socket.on(EVENTS.PLAYER_JOINED, addPlayer);
@@ -35,7 +37,7 @@ export const PlayerList = (): JSX.Element => {
       socket.off(EVENTS.PLAYER_LEFT, removePlayer);
       socket.off(EVENTS.TURN_ENDED, updateScores);
     };
-  }, []);
+  }, [addPlayer, removePlayer, updateScores]);
 
   return (
     <div>

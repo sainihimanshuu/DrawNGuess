@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { EVENTS, Player } from "../../types";
 import { socket } from "../../socket";
 
@@ -11,27 +11,27 @@ interface ChatTemplate {
 export const ChatArea = (): JSX.Element => {
   const [chats, setChats] = useState<ChatTemplate[]>([]);
 
-  const correctGuess = (player: Player) => {
-    setChats([
-      ...chats,
+  const correctGuess = useCallback((player: Player) => {
+    setChats((prevChats) => [
+      ...prevChats,
       {
         username: player.username,
         guess: null,
         isCorrect: true,
       },
     ]);
-  };
+  }, []);
 
-  const wrongGuess = (guess: string, player: Player) => {
-    setChats([
-      ...chats,
+  const wrongGuess = useCallback((guess: string, player: Player) => {
+    setChats((prevChats) => [
+      ...prevChats,
       {
         username: player.username,
         guess: guess,
         isCorrect: false,
       },
     ]);
-  };
+  }, []);
 
   useEffect(() => {
     socket.on(EVENTS.CORRECT_GUESS, correctGuess);
@@ -41,7 +41,7 @@ export const ChatArea = (): JSX.Element => {
       socket.off(EVENTS.CORRECT_GUESS);
       socket.off(EVENTS.WRONG_GUESS);
     };
-  }, []);
+  }, [correctGuess, wrongGuess]);
 
   return (
     <div>
