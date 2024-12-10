@@ -33,6 +33,7 @@ export function createNewRoom(player: Player, socket: Socket): void {
     AvailableIds.delete(parseInt(key));
     socketRoomMap.set(socket.id, roomId);
     socket.join(roomId);
+    socket.emit(EVENTS.JOINED_ROOM, roomId);
     return;
   }
 }

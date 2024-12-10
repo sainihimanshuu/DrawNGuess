@@ -23,6 +23,8 @@ export const io = new Server(httpServer, {
   },
 });
 
+//future- join a random room
+
 io.on("connection", (socket: Socket) => {
   console.log(`${socket.id} connected`);
 

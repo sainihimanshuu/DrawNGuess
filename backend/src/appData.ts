@@ -24,6 +24,7 @@ export enum EVENTS {
   START_GAME = "start-game",
   GUESS = "guess",
   //SERVER
+  JOINED_ROOM = "joined-room",
   PLAYER_JOINED = "player-joined",
   PLAYER_LEFT = "palyer-left",
   PLAYER_COORDINATES = "player-coordinates",
