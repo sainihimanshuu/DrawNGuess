@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import { Player, Room } from "../../types";
 import { socket } from "../../socket";
 import { EVENTS } from "../../types";
+import { useRoom } from "../../context/roomContext";
 
 //future- display playername joined, left etc
 
 export const PlayerList = (): JSX.Element => {
-  const [list, setList] = useState<Player[]>([]);
+  const { players } = useRoom();
+  const [list, setList] = useState<Player[]>(players);
 
   const addPlayer = useCallback((player: Player) => {
     setList([...list, player]);

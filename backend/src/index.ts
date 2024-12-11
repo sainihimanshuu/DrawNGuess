@@ -19,11 +19,15 @@ import { EVENTS } from "./appData";
 const httpServer = createServer();
 export const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://localhost:5173",
   },
 });
 
+const PORT = process.env.PORT || 3000;
+
 //future- join a random room
+//cases to solve - 1. timer value on frontend when a player join game midway someone's turn
+//2. drawing data until the player has drawn
 
 io.on("connection", (socket: Socket) => {
   console.log(`${socket.id} connected`);
@@ -43,6 +47,7 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on(EVENTS.CREATE_A_NEW_ROOM, (username: string, avatar: string) => {
+    console.log("ram ram");
     const admin = true;
     const newPlayer: Player = createNewPlayer(socket, username, avatar, admin);
 
@@ -88,4 +93,6 @@ io.on("connection", (socket: Socket) => {
   });
 });
 
-httpServer.listen(process.env.PORT);
+httpServer.listen(PORT, () => {
+  console.log("listening on port", PORT);
+});

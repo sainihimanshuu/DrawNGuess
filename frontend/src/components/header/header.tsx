@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { socket } from "../../socket";
-import { EVENTS, Room } from "../../types";
+import { EVENTS } from "../../types";
+import { useRoom } from "../../context/roomContext";
 
 export const Header = (): JSX.Element => {
-  const [word, setWord] = useState<string>("");
-  const [roundNo, setRoundNo] = useState<number>(0);
+  const { gameState } = useRoom();
+  const [word, setWord] = useState<string>(gameState.currentWord);
+  const [roundNo, setRoundNo] = useState<number>(gameState.currentRound);
   const [timer, setTimer] = useState<number>(60);
   const intervalRef = useRef<number | undefined>(undefined);
 
-  const turnEnded = useCallback((room: Room) => {
+  const turnEnded = useCallback(() => {
     //update round no, word and reset timer
     setWord("");
     setRoundNo((prevRoundNo) => prevRoundNo + 1);

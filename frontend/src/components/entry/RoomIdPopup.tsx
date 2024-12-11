@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { Button } from "../inputs/Button";
 
 export const RoomIdPopup = ({
   joinRoom,
@@ -11,7 +12,7 @@ export const RoomIdPopup = ({
   const modalRef = useRef(null);
 
   //figure out the type for event
-  const closeModal = (e) => {
+  const closeModal = (e: React.MouseEvent<HTMLDivElement>) => {
     if (modalRef.current === e.target) {
       outsideClick();
     }
@@ -23,13 +24,19 @@ export const RoomIdPopup = ({
       ref={modalRef}
       onClick={closeModal}
     >
-      <div className="flex flex-col items-stretch">
+      <div className="flex flex-col p-3 rounded-md bg-borderBlue w-96">
         <input
           type="text"
+          className="p-2 rounded-md mt-3 mb-5 w-full font-roboto font-semibold"
           placeholder="enter room id"
           onChange={(e) => setEnteredRoomId(e.target.value)}
         />
-        <button onClick={() => joinRoom(enteredRoomId)}>join</button>
+        <Button
+          className="border-0 bg-myGreen text-white font-roboto text-lg flex-1 mb-2"
+          onClick={() => joinRoom(enteredRoomId)}
+        >
+          join
+        </Button>
       </div>
     </div>
   );

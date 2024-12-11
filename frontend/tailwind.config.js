@@ -2,7 +2,16 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        roboto: ["Pangolin", "Josefin Sans"], // Add the Google Font here
+      },
+      colors: {
+        myGreen: "#59D936",
+        skyBlue: "#30A8F2",
+        borderBlue: "#113A8C",
+      },
+    },
   },
   plugins: [],
 };
