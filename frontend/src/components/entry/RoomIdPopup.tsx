@@ -32,7 +32,7 @@ export const RoomIdPopup = ({
           onChange={(e) => setEnteredRoomId(e.target.value)}
         />
         <Button
-          className="border-0 bg-myGreen text-white font-roboto text-lg flex-1 mb-2"
+          className="border-0 py-2 bg-myGreen text-white font-roboto text-lg flex-1 mb-2"
           onClick={() => joinRoom(enteredRoomId)}
         >
           join

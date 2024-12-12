@@ -32,6 +32,7 @@ export const RoomContextProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const handleJoinedRoom = (room: Room) => {
+    console.log("handle joined rrom from context");
     setRoom(room);
   };
 

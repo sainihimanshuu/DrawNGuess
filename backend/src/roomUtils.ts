@@ -11,15 +11,16 @@ import { EVENTS } from "./appData";
 //maybe i need to send an updated list of players every time
 
 export function createNewRoom(player: Player, socket: Socket): void {
-  console.log("hello");
   if (AvailableIds.size === 0) {
     socket.emit("error", {
       message: "Cannot create room now. Please try again later",
     });
     return;
   }
-  for (const key in AvailableIds.keys()) {
+  const keysArray = Array.from(AvailableIds.keys());
+  for (const key in keysArray) {
     const roomId = `room${key}`;
+    console.log(roomId);
     RoomList.set(roomId, {
       players: [player],
       noOfPlayers: 1,
@@ -35,8 +36,8 @@ export function createNewRoom(player: Player, socket: Socket): void {
     socketRoomMap.set(socket.id, roomId);
     socket.join(roomId);
     const room = RoomList.get(roomId);
-    console.log("room created");
     socket.emit(EVENTS.JOINED_ROOM, room);
+    console.log();
     return;
   }
 }

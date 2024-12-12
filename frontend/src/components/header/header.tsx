@@ -41,13 +41,13 @@ export const Header = (): JSX.Element => {
   }, [turnEnded, wordGiven]);
 
   return (
-    <div>
-      <div>
-        <h1>{timer}</h1>
+    <div className="flex flex-row justify-between items-center bg-borderBlue font-roboto h-16 text-white rounded-md">
+      <div className="flex flex-row text-2xl font-semibold">
+        <h1 className="mx-4">{timer}</h1>
         <h2>{`Round ${roundNo}`}</h2>
       </div>
       <div>{word.length === 0 ? <h1></h1> : <h1>{word}</h1>}</div>
-      /*insert drawnguess logo here*/
+      <h1 className="mr-4 text-4xl">draw n guess</h1>
     </div>
   );
 };

@@ -15,10 +15,10 @@ function App() {
   };
 
   useEffect(() => {
-    socket.on(EVENTS.PLAYER_JOINED, handleJoinedRoom);
+    socket.on(EVENTS.JOINED_ROOM, handleJoinedRoom);
 
     return () => {
-      socket.off(EVENTS.PLAYER_JOINED, handleJoinedRoom);
+      socket.off(EVENTS.JOINED_ROOM, handleJoinedRoom);
     };
   }, []);
   return (

@@ -31,7 +31,7 @@ export const Entry = (): JSX.Element => {
         />
         <div className="flex flex-row justify-center">
           <Button
-            className="border-0 bg-myGreen text-white font-roboto text-lg flex-1 mr-1"
+            className="border-0 py-2 bg-myGreen text-white font-roboto text-lg flex-1 mr-1"
             onClick={createRoom}
           >
             create room

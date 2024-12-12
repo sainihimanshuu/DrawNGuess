@@ -6,12 +6,12 @@ import { useRoom } from "../../context/roomContext";
 
 //future- display playername joined, left etc
 
-export const PlayerList = (): JSX.Element => {
+export const PlayerList = ({ ...props }): JSX.Element => {
   const { players } = useRoom();
   const [list, setList] = useState<Player[]>(players);
 
   const addPlayer = useCallback((player: Player) => {
-    setList([...list, player]);
+    setList((prevList) => [...prevList, player]);
   }, []);
 
   const removePlayer = useCallback((player: Player) => {
@@ -33,7 +33,8 @@ export const PlayerList = (): JSX.Element => {
     socket.on(EVENTS.PLAYER_JOINED, addPlayer);
     socket.on(EVENTS.PLAYER_LEFT, removePlayer);
     socket.on(EVENTS.TURN_ENDED, updateScores);
-
+    console.log("players  ");
+    console.log(list);
     return () => {
       socket.off(EVENTS.PLAYER_JOINED, addPlayer);
       socket.off(EVENTS.PLAYER_LEFT, removePlayer);
@@ -42,14 +43,15 @@ export const PlayerList = (): JSX.Element => {
   }, [addPlayer, removePlayer, updateScores]);
 
   return (
-    <div>
-      {list.map((player: Player) => (
-        <div>
-          <img src={player.avatar} />
-          <div>
-            <h1>{player.username}</h1>
-            <h3>{player.score}</h3>
-          </div>
+    <div {...props}>
+      {list.map((player) => (
+        <div
+          key={player.username}
+          className="bg-white mx-2 flex flex-row justify-between items-center font-semibold font-roboto h-10 p-3 rounded-md mb-1"
+        >
+          {/* <img src={player.avatar} /> */}
+          <h1>{player.username || "jlk"}</h1>
+          <h3>{`${player.score} points`}</h3>
         </div>
       ))}
     </div>

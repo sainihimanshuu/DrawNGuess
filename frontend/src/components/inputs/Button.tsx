@@ -19,7 +19,7 @@ export const Button = ({
     <button
       type={type}
       {...props}
-      className={`${className} px-6 py-2 bg-wedgewood text-biscay font-bold rounded-md border-2 border-astronaut transition duration-300 hover:translate-x-[-2px] hover:translate-y-[-2px]`}
+      className={`${className} bg-wedgewood text-biscay font-bold rounded-md border-2 border-astronaut transition duration-300 hover:translate-x-[-2px] hover:translate-y-[-2px]`}
     >
       {children}
     </button>

@@ -4,19 +4,50 @@ import { socket } from "../../socket";
 
 //future - throttling or debouncing for mouse movements
 
-export const Canvas = (): JSX.Element => {
+export const Canvas = ({ className }: { className: string }): JSX.Element => {
   const isDrawingRef = useRef<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null | undefined>(null);
 
   useEffect(() => {
+    const resizeCanvas = () => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      let imageData;
+      if (ctx) {
+        imageData = ctx.getImageData(0, 0, canvas?.width, canvas?.height);
+      }
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const devicePixelRatio = window.devicePixelRatio || 1;
+
+        // Update internal resolution
+        canvas.width = rect.width * devicePixelRatio;
+        canvas.height = rect.height * devicePixelRatio;
+
+        // Maintain visual size
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+
+        // Scale the drawing context
+        if (ctx) {
+          ctx.scale(devicePixelRatio, devicePixelRatio);
+          if (imageData) {
+            ctx.putImageData(imageData, 0, 0);
+          }
+        }
+      }
+    };
+    resizeCanvas();
     ctxRef.current = canvasRef.current?.getContext("2d");
     socket.on(EVENTS.PLAYER_COORDINATES, startsDrawing);
     socket.on(EVENTS.STOPPED_DRAWING, stoppedDrawing);
+    window.addEventListener("resize", resizeCanvas);
 
     return () => {
       socket.off(EVENTS.PLAYER_COORDINATES, startsDrawing);
       socket.off(EVENTS.STOPPED_DRAWING, stoppedDrawing);
+      window.removeEventListener("resize", resizeCanvas);
     };
   }, []);
 
@@ -57,15 +88,14 @@ export const Canvas = (): JSX.Element => {
   };
 
   return (
-    <div>
-      <canvas
-        ref={canvasRef}
-        onMouseDown={() => {
-          isDrawingRef.current = true;
-        }}
-        onMouseUp={() => meStoppedDrawing()}
-        onMouseMove={(event) => meDraw(event)}
-      />
-    </div>
+    <canvas
+      className={`bg-white rounded-md ${className}`}
+      ref={canvasRef}
+      onMouseDown={() => {
+        isDrawingRef.current = true;
+      }}
+      onMouseUp={() => meStoppedDrawing()}
+      onMouseMove={(event) => meDraw(event)}
+    />
   );
 };

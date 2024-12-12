@@ -11,6 +11,10 @@ export default {
         skyBlue: "#30A8F2",
         borderBlue: "#113A8C",
       },
+      flex: {
+        2.5: "2.5",
+        3: "3",
+      },
     },
   },
   plugins: [],
