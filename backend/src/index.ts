@@ -47,7 +47,6 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on(EVENTS.CREATE_A_NEW_ROOM, (username: string, avatar: string) => {
-    console.log("ram ram");
     const admin = true;
     const newPlayer: Player = createNewPlayer(socket, username, avatar, admin);
 
@@ -70,6 +69,7 @@ io.on("connection", (socket: Socket) => {
   );
 
   socket.on(EVENTS.DISCONNECT, () => {
+    console.log(socket.id, " Disconnected");
     removePlayerFromRoom(socket);
   });
 

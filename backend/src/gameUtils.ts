@@ -134,10 +134,14 @@ export function endGame(roomId: string): void {
 }
 
 export function wordGuessed(socket: Socket, guess: string): void {
-  const roomId: string | undefined = socketRoomMap.get(socket);
+  const roomId: string | undefined = socketRoomMap.get(socket.id);
+  console.log(socketRoomMap.size);
   if (!roomId) {
+    console.log(roomId);
+    console.log(guess, "inside roomId check");
     return;
   }
+  console.log(guess);
   const currentRoom: Room | undefined = RoomList.get(roomId);
   if (!currentRoom) {
     return;

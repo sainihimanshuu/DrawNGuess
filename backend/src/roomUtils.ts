@@ -34,6 +34,7 @@ export function createNewRoom(player: Player, socket: Socket): void {
     });
     AvailableIds.delete(parseInt(key));
     socketRoomMap.set(socket.id, roomId);
+    console.log("map size on creatino of room: ", socketRoomMap.size);
     socket.join(roomId);
     const room = RoomList.get(roomId);
     socket.emit(EVENTS.JOINED_ROOM, room);
@@ -58,17 +59,18 @@ export function addPlayerToRoom(
 ): void {
   const room = RoomList.get(roomId);
   if (!room) {
-    socket.emit("error", { message: "Room does not exist" });
+    socket.emit(EVENTS.ROOM_DOES_NOT_EXIST);
     return;
   }
   if (room.noOfPlayers === MAX_ROOM_SIZE) {
-    socket.emit("error", { message: "Room is full" });
+    socket.emit(EVENTS.ROOM_IS_FULL);
     return;
   }
   room.players.push(player);
   room.noOfPlayers++;
   socket.to(roomId).emit(EVENTS.PLAYER_JOINED, player);
   socketRoomMap.set(socket.id, roomId);
+  console.log("map size on joining of room: ", socketRoomMap.size);
   socket.join(roomId);
   socket.emit(EVENTS.JOINED_ROOM, room);
   return;
@@ -116,17 +118,21 @@ export function removePlayerFromRoom(socket: Socket): void {
   playersRoom.noOfPlayers--;
   socketRoomMap.delete(socket.id);
   socket.leave(playersRoomId);
+  console.log("room size when leaving:", socketRoomMap.size);
 
   //if leaving player was the last player
   if (playersRoom.noOfPlayers === 0) {
     RoomList.delete(playersRoomId);
+    console.log("room deleted");
     return;
   }
 
   //if leaving player was admin, make a new admin
   if (playersRoom.admin === socket.id) {
+    console.log("old admin username:", playersRoom.admin);
     const newAdminSocketId = playersRoom.players[0].socketId;
     playersRoom.admin = newAdminSocketId;
     playersRoom.players[0].admin = true;
+    console.log("new admin username:", playersRoom.admin);
   }
 }

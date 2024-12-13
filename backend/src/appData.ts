@@ -35,6 +35,8 @@ export enum EVENTS {
   CORRECT_GUESS = "correct-guess",
   WRONG_GUESS = "wrong-guess",
   TURN_ENDED = "turn-ended",
+  ROOM_DOES_NOT_EXIST = "room-does-not-exist",
+  ROOM_IS_FULL = "room-is-full",
 }
 
 export const wordLibrary = [

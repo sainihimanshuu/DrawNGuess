@@ -6,7 +6,11 @@ import { useRoom } from "../../context/roomContext";
 
 //future- display playername joined, left etc
 
-export const PlayerList = ({ ...props }): JSX.Element => {
+export const PlayerList = ({
+  className,
+}: {
+  className: string;
+}): JSX.Element => {
   const { players } = useRoom();
   const [list, setList] = useState<Player[]>(players);
 
@@ -15,7 +19,9 @@ export const PlayerList = ({ ...props }): JSX.Element => {
   }, []);
 
   const removePlayer = useCallback((player: Player) => {
-    setList((prevList) => prevList.filter((p) => p !== player));
+    setList((prevList) =>
+      prevList.filter((p) => p.socketId !== player.socketId)
+    );
   }, []);
 
   const updateScores = useCallback((room: Room) => {
@@ -43,7 +49,7 @@ export const PlayerList = ({ ...props }): JSX.Element => {
   }, [addPlayer, removePlayer, updateScores]);
 
   return (
-    <div {...props}>
+    <div className={`${className} overflow-y-auto`}>
       {list.map((player) => (
         <div
           key={player.username}

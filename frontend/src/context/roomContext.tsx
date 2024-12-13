@@ -54,6 +54,7 @@ export const RoomContextProvider = ({ children }: { children: ReactNode }) => {
       currentWord: room.gameState.currentWord,
       correctGuessors: room.gameState.correctGuessors,
     },
+    setRoom: (newRoom: Room) => setRoom(newRoom),
   };
 
   return (
