@@ -9,6 +9,7 @@ export interface Player {
 }
 
 export interface Room {
+  roomId: string;
   players: Player[];
   noOfPlayers: number;
   admin: string; //socket.id

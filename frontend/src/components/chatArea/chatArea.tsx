@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { EVENTS, Player } from "../../types";
 import { socket } from "../../socket";
 import { Button } from "../common/Button";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { CustomToast } from "../common/CustomToast";
-import { toastOptions } from "../../types";
+//import "react-toastify/dist/ReactToastify.css";
+// import { CustomToast } from "../common/CustomToast";
+// import { toastOptions } from "../../types";
+import { useRoom } from "../../context/roomContext";
 
 interface ChatTemplate {
   username: string;
@@ -14,6 +14,7 @@ interface ChatTemplate {
 }
 
 export const ChatArea = ({ className }: { className: string }): JSX.Element => {
+  const { me } = useRoom();
   const [chats, setChats] = useState<ChatTemplate[]>([]);
   const [myGuess, setMyGuess] = useState<string>("");
 
@@ -51,7 +52,7 @@ export const ChatArea = ({ className }: { className: string }): JSX.Element => {
 
   const handleSend = () => {
     if (myGuess === "") {
-      toast.error(<CustomToast message="enter a guess" />, toastOptions);
+      // toast.error(<CustomToast message="enter a guess" />, toastOptions);
       return;
     }
     socket.emit(EVENTS.GUESS, myGuess);
@@ -59,14 +60,14 @@ export const ChatArea = ({ className }: { className: string }): JSX.Element => {
   };
   return (
     <>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <div className={`${className}`}>
-        <div className={`flex flex-col h-full font-roboto`}>
+        <div className="flex flex-col h-full font-roboto">
           <div className="flex-1 overflow-y-auto">
             {chats.map((chat) =>
               chat.isCorrect ? (
-                <div className="font-semibold bg-lightMyGreen text-myGreen">
-                  <h3>{`${chat.username} has guessed the word`}</h3>
+                <div className="font-semibold bg-lightMyGreen text-ansGreen mb-1 rounded-md mx-2 px-2 py-1">
+                  <h3 className="text">{`${chat.username} has guessed the word`}</h3>
                 </div>
               ) : (
                 <div className="flex flex-row bg-white mb-1 rounded-md mx-2 px-2 py-1">
@@ -84,10 +85,12 @@ export const ChatArea = ({ className }: { className: string }): JSX.Element => {
               className="rounded-md p-1"
               onChange={(e) => setMyGuess(e.target.value)}
               value={myGuess}
+              disabled={me?.drawing}
             />
             <Button
               className="border-0 bg-myGreen text-white text-md h-8 w-14 px-0 py-0 ml-1"
               onClick={handleSend}
+              disabled={me?.drawing}
             >
               {`->`}
             </Button>

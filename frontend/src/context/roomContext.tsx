@@ -5,10 +5,26 @@ import {
   useEffect,
   useState,
 } from "react";
-import { EVENTS, Room } from "../types";
+import { EVENTS, Player, Room } from "../types";
 import { socket } from "../socket";
 
-export const RoomContext = createContext<Room | null>(null);
+interface ContextValues {
+  roomId: string;
+  players: Player[];
+  noOfPlayers: number;
+  admin: string;
+  gameState: {
+    currentRound: number;
+    currentPlayer: number;
+    currentWord: string;
+    correctGuessors: Set<string>;
+  };
+  me: Player | undefined;
+  setMe: React.Dispatch<React.SetStateAction<Player>>;
+  setRoom: React.Dispatch<React.SetStateAction<Room>>;
+}
+
+export const RoomContext = createContext<ContextValues | null>(null);
 
 export const useRoom = () => {
   const context = useContext(RoomContext);
@@ -20,6 +36,7 @@ export const useRoom = () => {
 
 export const RoomContextProvider = ({ children }: { children: ReactNode }) => {
   const [room, setRoom] = useState<Room>({
+    roomId: "",
     players: [],
     noOfPlayers: 0,
     admin: "",
@@ -30,10 +47,22 @@ export const RoomContextProvider = ({ children }: { children: ReactNode }) => {
       correctGuessors: new Set<string>(),
     },
   });
+  const [me, setMe] = useState<Player>({
+    username: "",
+    avatar: "",
+    score: 0,
+    socketId: "",
+    drawing: false,
+    admin: false,
+    guessedAt: null,
+  });
 
   const handleJoinedRoom = (room: Room) => {
     console.log("handle joined rrom from context");
     setRoom(room);
+    setMe(
+      (prevMe) => room.players.find((p) => p.socketId === socket.id) || prevMe
+    );
   };
 
   useEffect(() => {
@@ -44,7 +73,8 @@ export const RoomContextProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const contextValue = {
+  const contextValue: ContextValues = {
+    roomId: room.roomId,
     players: room.players,
     noOfPlayers: room.noOfPlayers,
     admin: room.admin,
@@ -54,7 +84,9 @@ export const RoomContextProvider = ({ children }: { children: ReactNode }) => {
       currentWord: room.gameState.currentWord,
       correctGuessors: room.gameState.correctGuessors,
     },
-    setRoom: (newRoom: Room) => setRoom(newRoom),
+    setRoom: setRoom,
+    me: me,
+    setMe: setMe,
   };
 
   return (

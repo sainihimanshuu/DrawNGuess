@@ -1,10 +1,12 @@
 import { useEffect, useRef, MouseEvent } from "react";
 import { EVENTS } from "../../types";
 import { socket } from "../../socket";
+import { useRoom } from "../../context/roomContext";
 
 //future - throttling or debouncing for mouse movements
 
 export const Canvas = ({ className }: { className: string }): JSX.Element => {
+  const { me } = useRoom();
   const isDrawingRef = useRef<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null | undefined>(null);
@@ -38,10 +40,20 @@ export const Canvas = ({ className }: { className: string }): JSX.Element => {
         }
       }
     };
+    const turnEnded = () => {
+      ctxRef.current?.beginPath();
+      ctxRef.current?.clearRect(
+        0,
+        0,
+        canvasRef.current?.width,
+        canvasRef.current?.height
+      );
+    };
     resizeCanvas();
     ctxRef.current = canvasRef.current?.getContext("2d");
     socket.on(EVENTS.PLAYER_COORDINATES, startsDrawing);
     socket.on(EVENTS.STOPPED_DRAWING, stoppedDrawing);
+    socket.on(EVENTS.TURN_ENDED, turnEnded);
     window.addEventListener("resize", resizeCanvas);
 
     return () => {
@@ -72,7 +84,7 @@ export const Canvas = ({ className }: { className: string }): JSX.Element => {
   };
 
   const meDraw = (event: MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawingRef.current || !ctxRef.current) {
+    if (!isDrawingRef.current || !ctxRef.current || me?.drawing === false) {
       return;
     }
     const { offsetX, offsetY } = getOffset();

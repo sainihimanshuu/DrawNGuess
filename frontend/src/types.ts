@@ -25,6 +25,7 @@ export enum EVENTS {
   TURN_ENDED = "turn-ended",
   ROOM_DOES_NOT_EXIST = "room-does-not-exist",
   ROOM_IS_FULL = "room-is-full",
+  YOU_ARE_ADMIN = "you-are-admin",
 }
 
 export interface Player {
@@ -38,6 +39,7 @@ export interface Player {
 }
 
 export interface Room {
+  roomId: string;
   players: Player[];
   noOfPlayers: number;
   admin: string; //socket.id

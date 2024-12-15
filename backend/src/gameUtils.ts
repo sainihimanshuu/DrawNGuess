@@ -45,6 +45,7 @@ export function startGame(socket: Socket): void {
   }
   room.gameState.currentRound = 1;
   room.gameState.currentPlayer = 0;
+  room.players[room.gameState.currentPlayer].drawing = true;
   io.to(roomId).emit(EVENTS.GAME_STARTED, room);
   assignWord(roomId);
 }
@@ -58,6 +59,7 @@ export function assignWord(roomId: string): void {
   if (!currentRoom) {
     return;
   }
+  currentRoom.gameState.currentWord = word;
   const currentPlayerIndex: number = currentRoom.gameState.currentPlayer;
   const currentPlayer: Player = currentRoom.players[currentPlayerIndex];
   io.to(currentPlayer.socketId).emit(EVENTS.WORD_GIVEN, word);
@@ -77,14 +79,17 @@ export function endRound(roomId: string): void {
   if (!currentRoom) {
     return;
   }
+  currentRoom.players[currentRoom.gameState.currentPlayer].drawing = false;
   currentRoom.gameState.currentPlayer++;
-  if (currentRoom.gameState.currentPlayer === 8) {
+  if (currentRoom.gameState.currentPlayer === currentRoom.noOfPlayers) {
     //this means the current round has ended
     currentRoom.gameState.currentPlayer = 0;
     currentRoom.gameState.currentRound++;
   }
 
   givePoints(roomId);
+  currentRoom.gameState.correctGuessors.clear();
+  currentRoom.players[currentRoom.gameState.currentPlayer].drawing = true;
   currentRoom.gameState.currentWord = "";
   io.to(roomId).emit(EVENTS.TURN_ENDED, currentRoom);
 
@@ -110,11 +115,16 @@ export function givePoints(roomId: string): void {
       const timeLeft =
         Math.abs(now.getTime() - (p.guessedAt ? p.guessedAt : now).getTime()) /
         1000;
-      p.score += Math.max(100, timeLeft * 10);
+      p.score += Math.floor(Math.min(100, timeLeft * 10));
+      console.log("guessor points", Math.floor(Math.max(100, timeLeft * 10)));
     }
     if (p === currentRoom.players[currentRoom.gameState.currentPlayer]) {
       //player who drew
-      p.score += 50 * currentRoom.gameState.correctGuessors.size;
+      p.score += Math.floor(50 * currentRoom.gameState.correctGuessors.size);
+      console.log(
+        "drawer points",
+        Math.floor(50 * currentRoom.gameState.correctGuessors.size)
+      );
     }
   }
 }
@@ -141,7 +151,6 @@ export function wordGuessed(socket: Socket, guess: string): void {
     console.log(guess, "inside roomId check");
     return;
   }
-  console.log(guess);
   const currentRoom: Room | undefined = RoomList.get(roomId);
   if (!currentRoom) {
     return;
@@ -165,6 +174,7 @@ export function wordGuessed(socket: Socket, guess: string): void {
       endRound(roomId);
     }
   } else {
+    console.log("incorecty");
     io.to(roomId).emit(EVENTS.WRONG_GUESS, guess, guesserPlayer);
   }
 }

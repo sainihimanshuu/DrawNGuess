@@ -7,6 +7,7 @@ import {
 } from "./appData";
 import { Socket } from "socket.io";
 import { EVENTS } from "./appData";
+import { io } from ".";
 
 //maybe i need to send an updated list of players every time
 
@@ -18,10 +19,10 @@ export function createNewRoom(player: Player, socket: Socket): void {
     return;
   }
   const keysArray = Array.from(AvailableIds.keys());
-  for (const key in keysArray) {
+  for (const key of keysArray) {
     const roomId = `room${key}`;
-    console.log(roomId);
     RoomList.set(roomId, {
+      roomId: roomId,
       players: [player],
       noOfPlayers: 1,
       admin: socket.id,
@@ -32,13 +33,11 @@ export function createNewRoom(player: Player, socket: Socket): void {
         correctGuessors: new Set<string>(),
       },
     });
-    AvailableIds.delete(parseInt(key));
+    AvailableIds.delete(key);
     socketRoomMap.set(socket.id, roomId);
-    console.log("map size on creatino of room: ", socketRoomMap.size);
     socket.join(roomId);
     const room = RoomList.get(roomId);
     socket.emit(EVENTS.JOINED_ROOM, room);
-    console.log();
     return;
   }
 }
@@ -123,7 +122,9 @@ export function removePlayerFromRoom(socket: Socket): void {
   //if leaving player was the last player
   if (playersRoom.noOfPlayers === 0) {
     RoomList.delete(playersRoomId);
-    console.log("room deleted");
+    const roomId = playersRoom.roomId;
+    const id = parseInt(roomId[roomId.length - 1]);
+    AvailableIds.set(id, 1);
     return;
   }
 
@@ -134,5 +135,6 @@ export function removePlayerFromRoom(socket: Socket): void {
     playersRoom.admin = newAdminSocketId;
     playersRoom.players[0].admin = true;
     console.log("new admin username:", playersRoom.admin);
+    io.to(newAdminSocketId).emit(EVENTS.YOU_ARE_ADMIN);
   }
 }

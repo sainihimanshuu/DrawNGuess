@@ -8,7 +8,8 @@ export default {
       },
       colors: {
         myGreen: "#59D936",
-        lightMyGreen: "#59D936",
+        lightMyGreen: "#ABEA99",
+        ansGreen: "#4BCE27",
         skyBlue: "#30A8F2",
         borderBlue: "#113A8C",
       },
