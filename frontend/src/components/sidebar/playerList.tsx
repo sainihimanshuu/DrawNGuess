@@ -3,8 +3,7 @@ import { Player, Room } from "../../types";
 import { socket } from "../../socket";
 import { EVENTS } from "../../types";
 import { useRoom } from "../../context/roomContext";
-
-//future- display playername joined, left etc
+import pencil from "../../assets/pencil.png";
 
 export const PlayerList = ({
   className,
@@ -35,15 +34,26 @@ export const PlayerList = ({
     );
   }, []);
 
+  const turnEnded = useCallback((room: Room) => {
+    setList(room.players);
+  }, []);
+
+  const gameStarted = useCallback((room: Room) => {
+    setList(room.players);
+  }, []);
+
   useEffect(() => {
     socket.on(EVENTS.PLAYER_JOINED, addPlayer);
     socket.on(EVENTS.PLAYER_LEFT, removePlayer);
+    socket.on(EVENTS.TURN_ENDED, turnEnded);
+    socket.on(EVENTS.GAME_STARTED, gameStarted);
     socket.on(EVENTS.TURN_ENDED, updateScores);
-    console.log("players  ");
-    console.log(list);
+
     return () => {
       socket.off(EVENTS.PLAYER_JOINED, addPlayer);
       socket.off(EVENTS.PLAYER_LEFT, removePlayer);
+      socket.off(EVENTS.TURN_ENDED, turnEnded);
+      socket.off(EVENTS.GAME_STARTED, gameStarted);
       socket.off(EVENTS.TURN_ENDED, updateScores);
     };
   }, [addPlayer, removePlayer, updateScores]);
@@ -57,7 +67,10 @@ export const PlayerList = ({
         >
           {/* <img src={player.avatar} /> */}
           <h1>{player.username || "jlk"}</h1>
-          <h3>{`${player.score} points`}</h3>
+          <div className="flex flex-row">
+            {player.drawing && <img src={pencil} className="mr-1 size-6" />}
+            <h3>{`${player.score} points`}</h3>
+          </div>
         </div>
       ))}
     </div>

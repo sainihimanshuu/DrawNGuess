@@ -3,9 +3,10 @@ import { socket } from "../../socket";
 import { EVENTS } from "../../types";
 import { RoomIdPopup } from "./RoomIdPopup";
 import { Button } from "../common/Button";
-//import "react-toastify/dist/ReactToastify.css";
-// import { CustomToast } from "../common/CustomToast";
-// import { toastOptions } from "../../types";
+import "react-toastify/dist/ReactToastify.css";
+import { CustomToast } from "../common/CustomToast";
+import { toastOptions } from "../../types";
+import { toast, ToastContainer } from "react-toastify";
 
 export const Entry = (): JSX.Element => {
   const [username, setUsername] = useState<string>("");
@@ -13,7 +14,7 @@ export const Entry = (): JSX.Element => {
 
   const createRoom = () => {
     if (username === "") {
-      // toast.error(<CustomToast message="enter a username" />, toastOptions);
+      toast.error(<CustomToast message="enter a username" />, toastOptions);
       return;
     }
     socket.emit(EVENTS.CREATE_A_NEW_ROOM, username, "");
@@ -21,7 +22,7 @@ export const Entry = (): JSX.Element => {
 
   const handleJoinRoom = () => {
     if (username === "") {
-      // toast.error(<CustomToast message="enter a username" />, toastOptions);
+      toast.error(<CustomToast message="enter a username" />, toastOptions);
       return;
     }
     setRoomIdPopup(true);
@@ -29,7 +30,7 @@ export const Entry = (): JSX.Element => {
 
   return (
     <>
-      {/* <ToastContainer /> */}
+      <ToastContainer />
       <div className="flex flex-col p-3 rounded-md bg-borderBlue w-96">
         <h1 className="font-bold font-roboto text-white text-6xl">
           draw n guess

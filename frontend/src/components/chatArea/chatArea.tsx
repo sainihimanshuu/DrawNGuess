@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { EVENTS, Player } from "../../types";
 import { socket } from "../../socket";
 import { Button } from "../common/Button";
-//import "react-toastify/dist/ReactToastify.css";
-// import { CustomToast } from "../common/CustomToast";
-// import { toastOptions } from "../../types";
+import "react-toastify/dist/ReactToastify.css";
+import { CustomToast } from "../common/CustomToast";
+import { toastOptions } from "../../types";
 import { useRoom } from "../../context/roomContext";
+import { toast } from "react-toastify";
 
 interface ChatTemplate {
   username: string;
@@ -52,7 +53,7 @@ export const ChatArea = ({ className }: { className: string }): JSX.Element => {
 
   const handleSend = () => {
     if (myGuess === "") {
-      // toast.error(<CustomToast message="enter a guess" />, toastOptions);
+      toast.error(<CustomToast message="enter a guess" />, toastOptions);
       return;
     }
     socket.emit(EVENTS.GUESS, myGuess);
@@ -77,7 +78,6 @@ export const ChatArea = ({ className }: { className: string }): JSX.Element => {
               )
             )}
           </div>
-          {/* <div className="flex-none"> */}
           <div className=" flex-none flex flex-row mx-2">
             <input
               type="text"
@@ -95,7 +95,6 @@ export const ChatArea = ({ className }: { className: string }): JSX.Element => {
               {`->`}
             </Button>
           </div>
-          {/* </div> */}
         </div>
       </div>
     </>

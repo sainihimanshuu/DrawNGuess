@@ -90,8 +90,9 @@ export function endRound(roomId: string): void {
   givePoints(roomId);
   currentRoom.gameState.correctGuessors.clear();
   currentRoom.players[currentRoom.gameState.currentPlayer].drawing = true;
+  const prevWord = currentRoom.gameState.currentWord;
   currentRoom.gameState.currentWord = "";
-  io.to(roomId).emit(EVENTS.TURN_ENDED, currentRoom);
+  io.to(roomId).emit(EVENTS.TURN_ENDED, currentRoom, prevWord);
 
   const timeOut = setTimeout(() => {
     if (currentRoom.gameState.currentRound === MAX_ROUNDS) {

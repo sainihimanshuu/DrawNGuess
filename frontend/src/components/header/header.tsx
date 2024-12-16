@@ -9,6 +9,7 @@ export const Header = (): JSX.Element => {
   const [roundNo, setRoundNo] = useState<number>(gameState.currentRound);
   const [timer, setTimer] = useState<number>(60);
   const intervalRef = useRef<number | undefined>(undefined);
+  const [ended, setEnded] = useState<boolean>(false);
 
   const turnEnded = useCallback(() => {
     //update round no, word and reset timer
@@ -29,22 +30,28 @@ export const Header = (): JSX.Element => {
     }, 1000);
   }, []);
 
+  const gameEnded = useCallback(() => {
+    setEnded(true);
+  }, []);
+
   useEffect(() => {
     socket.on(EVENTS.TURN_ENDED, turnEnded);
     socket.on(EVENTS.WORD_GIVEN, wordGiven);
+    socket.on(EVENTS.GAME_ENDED, gameEnded);
 
     return () => {
       socket.off(EVENTS.TURN_ENDED, turnEnded);
       socket.off(EVENTS.WORD_GIVEN, wordGiven);
+      socket.off(EVENTS.GAME_ENDED, gameEnded);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [turnEnded, wordGiven]);
+  }, [turnEnded, wordGiven, gameEnded]);
 
   return (
-    <div className="flex flex-row justify-between items-center bg-borderBlue font-roboto h-16 text-white rounded-md">
+    <div className="flex flex-row justify-between items-center bg-borderBlue font-roboto min-h-14 text-white rounded-md">
       <div className="flex flex-row text-2xl font-semibold">
         <h1 className="mx-4">{timer}</h1>
-        <h2>{`Round ${roundNo}`}</h2>
+        <h2>{!ended ? `Round ${roundNo}` : "game ended"}</h2>
       </div>
       <div>{word.length === 0 ? <h1></h1> : <h1>{word}</h1>}</div>
       <h1 className="mr-4 text-4xl">draw n guess</h1>

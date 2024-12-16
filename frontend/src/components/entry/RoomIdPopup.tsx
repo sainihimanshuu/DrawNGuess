@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../common/Button";
-// import { toast, ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import { CustomToast } from "../common/CustomToast";
-// import { EVENTS, toastOptions } from "../../types";
-import { EVENTS } from "../../types";
+import { CustomToast } from "../common/CustomToast";
+import { EVENTS, toastOptions } from "../../types";
 import { socket } from "../../socket";
 
 export const RoomIdPopup = ({
@@ -20,10 +19,10 @@ export const RoomIdPopup = ({
   useEffect(() => {
     console.log("hello from useEffect");
     const roomNotExist = () => {
-      // toast.error(<CustomToast message="room does not exist" />, toastOptions);
+      toast.error(<CustomToast message="room does not exist" />, toastOptions);
     };
     const roomFull = () => {
-      // toast.error(<CustomToast message="room is full" />, toastOptions);
+      toast.error(<CustomToast message="room is full" />, toastOptions);
     };
     socket.on(EVENTS.ROOM_DOES_NOT_EXIST, roomNotExist);
     socket.on(EVENTS.ROOM_IS_FULL, roomFull);
@@ -44,14 +43,14 @@ export const RoomIdPopup = ({
 
   const joinRoom = (roomId: string) => {
     if (roomId === "") {
-      // toast.error(<CustomToast message="enter a roomId" />, toastOptions);
+      toast.error(<CustomToast message="enter a roomId" />, toastOptions);
       return;
     }
     socket.emit(EVENTS.JOIN_A_ROOM, username, "", roomId);
   };
   return (
     <>
-      {/* <ToastContainer /> */}
+      <ToastContainer />
       <div
         className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center"
         ref={modalRef}
